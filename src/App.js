@@ -2,6 +2,8 @@ import React, { useRef, useState, useEffect } from 'react';
 import ReactDOM from 'react-dom';
 import './App.css';
 import ReconnectingWebSocket from 'reconnecting-websocket';
+import axios from 'axios';
+
 
 
 let counter = 0
@@ -21,14 +23,30 @@ function App() {
   const inpuNickRef = useRef(null)
   const inputRef = useRef(null);
   const onlineRef = useRef(null)
+  const inputPasswordRef = useRef(null)
   const [status, setStatus] = useState('');
   const [onlineUsers, setOnlineUsers] = useState(0);
 
-  // const updateStatus = (value) => {
-  //   if (statusRef.current) {
-  //     statusRef.current.innerHTML = value;
-  //   }
-  // };
+
+  const handleSaveNickname = async () => {
+    const nickname = inpuNickRef.current.value.trim();
+    const password = inputPasswordRef.current.value.trim();
+
+    if (nickname && password !== '') {
+      try {
+        const response = await axios.post('http://localhost:5001/saveNickname', { nickname, password });
+        if (response.data.success) {
+          console.log('Nickname and password saved successfully');
+        } else {
+          console.error('Failed to save nickname:', response.data.error);
+        }
+      } catch (error) {
+        console.error('Error while saving nickname:', error);
+      }
+    } else {
+      console.error('Nickname cannot be empty');
+    }
+  };
 
   const printMessage = (value, className, nickname) => {
     if (messagesRef.current && value && typeof value === 'string') {
@@ -75,7 +93,6 @@ function App() {
     event.preventDefault();
     const inputValue = inputRef.current.value.trim();
     const inputNickValue = inpuNickRef.current.value.trim();
-
     if (inputValue && inputNickValue !== '') {
       const messageData = {
         message: inputValue,
@@ -159,9 +176,12 @@ function App() {
     <header className='App-header'>
 
       <div className='nickName'>
-        <div>Your nickname:</div>
+        <div>nickname:</div>
         <input autocomplete="off" id="inputNick" ref={inpuNickRef} onKeyDown={handleKeyDown} />
-        <button className='btn-nick' type='submit'>
+        <div>password:</div>
+        <input autocomplete="off" id="inputNick" ref={inputPasswordRef} onKeyDown={handleKeyDown} />
+
+        <button className='btn-nick' type='submit' onClick={handleSaveNickname}>
           save
         </button>
       </div>

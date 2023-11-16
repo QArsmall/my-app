@@ -10,7 +10,7 @@
 
 # production
 /build
-
+nicknames.txt
 # misc
 .DS_Store
 .env.local

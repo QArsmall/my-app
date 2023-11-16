@@ -1,6 +1,7 @@
 const express = require('express');
 const http = require('http');
 const WebSocket = require('ws');
+const fs = require('fs');
 
 const app = express();
 const server = http.createServer(app);
@@ -63,7 +64,32 @@ wss.on('connection', ws => {
   ws.send(JSON.stringify({ data: 'hello world', origin: 'server', type: 'server', clientId: ws.clientId }));
 });
 
-// const PORT = 3023;
+app.use((req, res, next) => {
+  res.header('Access-Control-Allow-Origin', 'http://localhost:3000');
+  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
+  next();
+});
+app.post('/saveNickname', express.json(), (req, res) => {
+  try {
+    const { nickname, password } = req.body;
+    if (!nickname && password) {
+      throw new Error('Nickname is missing');
+    }
+
+    const filePath = 'nicknames.txt';
+    if (!fs.existsSync(filePath)) {
+      fs.writeFileSync(filePath, '', { flag: 'w' });
+    }
+
+    fs.writeFileSync(filePath, `${nickname} = ${password}\n`, { flag: 'a' });
+
+    res.status(200).json({ success: true });
+  } catch (error) {
+    console.error('Error handling request:', error);
+    res.status(500).json({ success: false, error: 'Internal Server Error' });
+  }
+});
+
 const PORT = 5001;
 server.listen(PORT, () => {
   console.log('Server is listening on port:', PORT);
