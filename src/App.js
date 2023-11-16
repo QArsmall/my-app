@@ -26,25 +26,40 @@ function App() {
   const inputPasswordRef = useRef(null)
   const [status, setStatus] = useState('');
   const [onlineUsers, setOnlineUsers] = useState(0);
+  const [registrationStatus, setRegistrationStatus] = useState('');
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
 
 
   const handleSaveNickname = async () => {
     const nickname = inpuNickRef.current.value.trim();
     const password = inputPasswordRef.current.value.trim();
-
+  
     if (nickname && password !== '') {
       try {
         const response = await axios.post('http://localhost:5001/saveNickname', { nickname, password });
         if (response.data.success) {
+          console.log('test:', response.data.loginSuccess)
+
+          if (response.data.loginSuccess) {
+            console.log('test:', response.data.success)
+            setRegistrationStatus('Успешный вход!');
+            setIsLoggedIn(true);
+          } else {
+            setRegistrationStatus('Успешная регистрация!');
+          }
           console.log('Nickname and password saved successfully');
         } else {
+          setRegistrationStatus(`Ошибка при регистрации или входе: ${response.data.error}`);
           console.error('Failed to save nickname:', response.data.error);
         }
       } catch (error) {
+        setRegistrationStatus(`Ошибка при регистрации или входе: ${error.message}`);
         console.error('Error while saving nickname:', error);
       }
     } else {
-      console.error('Nickname cannot be empty');
+      setRegistrationStatus('Никнейм и пароль не могут быть пустыми');
+      console.error('Nickname and password cannot be empty');
     }
   };
 
@@ -113,7 +128,6 @@ function App() {
   };
 
   useEffect(() => {
-
     const handleOpen = () => {
       setStatus('online...');
       getOnlineUsers();
@@ -184,6 +198,8 @@ function App() {
         <button className='btn-nick' type='submit' onClick={handleSaveNickname}>
           save
         </button>
+        <div className="registration-status">{registrationStatus}</div>
+
       </div>
       <div className='status' id="status" ref={statusRef}>
         {status}

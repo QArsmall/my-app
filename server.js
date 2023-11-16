@@ -72,23 +72,38 @@ app.use((req, res, next) => {
 app.post('/saveNickname', express.json(), (req, res) => {
   try {
     const { nickname, password } = req.body;
-    if (!nickname && password) {
-      throw new Error('Nickname is missing');
+    if (!nickname || !password) {
+      throw new Error('Nickname or password is missing');
     }
 
     const filePath = 'nicknames.txt';
-    if (!fs.existsSync(filePath)) {
-      fs.writeFileSync(filePath, '', { flag: 'w' });
+    let fileContent = '';
+
+    if (fs.existsSync(filePath)) {
+      fileContent = fs.readFileSync(filePath, 'utf-8');
     }
 
-    fs.writeFileSync(filePath, `${nickname} = ${password}\n`, { flag: 'a' });
+    const existingUser = fileContent
+      .split('\n')
+      .map(line => line.split(' = ')[0].trim()) // Получаем все имена из файла
+      .find(existingNickname => existingNickname === nickname);
 
-    res.status(200).json({ success: true });
+    if (existingUser) {
+      console.log('Successful login'); // Уже существует пользователь с таким именем
+      res.status(200).json({ success: true, loginSuccess: true, message: 'Successful login' });
+    } else {
+      // Записываем нового пользователя в файл
+      fs.writeFileSync(filePath, `${nickname} = ${password}\n`, { flag: 'a' });
+      console.log('Successful registration');
+      res.status(200).json({ success: true, loginSuccess: false, message: 'Successful registration' });
+    }
   } catch (error) {
     console.error('Error handling request:', error);
     res.status(500).json({ success: false, error: 'Internal Server Error' });
   }
 });
+
+
 
 const PORT = 5001;
 server.listen(PORT, () => {
