@@ -19,7 +19,6 @@ const updateOnlineUsers = () => {
 
   broadcast(message);
 };
-
 const broadcast = (message) => {
   wss.clients.forEach(client => {
     if (client.readyState === WebSocket.OPEN) {
