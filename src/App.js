@@ -189,9 +189,9 @@ function App() {
 
       <div className='nickName'>
         <div>nickname:</div>
-        <input autocomplete="off" id="inputNick" ref={inpuNickRef} onKeyDown={handleKeyDown} />
+        <input  id="inputNick" ref={inpuNickRef} onKeyDown={handleKeyDown} />
         <div>password:</div>
-        <input autocomplete="off" id="inputNick" ref={inputPasswordRef} onKeyDown={handleKeyDown} />
+        <input id="inputNick" ref={inputPasswordRef} onKeyDown={handleKeyDown} />
 
         <button className='btn-nick' type='submit' onClick={handleSaveNickname}>
         enter
@@ -210,7 +210,7 @@ function App() {
         </div>
 
         <form onSubmit={handleSubmit} className='form-message'>
-          <input autocomplete="off" id="input" ref={inputRef} onKeyDown={handleKeyDown} />
+          <input id="input" ref={inputRef} onKeyDown={handleKeyDown} />
           <button className='btn-send' type='submit'>
             Send
           </button>
