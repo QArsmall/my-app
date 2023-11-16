@@ -12,11 +12,12 @@ let clientId; // объявление переменной clientId за пре�
 let clientNick = 'anonymous';
 
 function App() {
-  if (!counter) { ws = new WebSocket('ws://192.168.1.118:5001');
+  if (!counter) {
+    ws = new WebSocket('ws://192.168.1.118:5001');
 
-};
-// if (!counter) { ws = new WebSocket('ws://localhost:3023');
-//  };
+  };
+  // if (!counter) { ws = new WebSocket('ws://localhost:3023');
+  //  };
   counter += 1
   const statusRef = useRef(null);
   const messagesRef = useRef(null);
@@ -34,28 +35,26 @@ function App() {
   const handleSaveNickname = async () => {
     const nickname = inpuNickRef.current.value.trim();
     const password = inputPasswordRef.current.value.trim();
-  
+
     if (nickname && password !== '') {
       try {
         const response = await axios.post('http://localhost:5001/saveNickname', { nickname, password });
         if (response.data.success) {
 
           if (response.data.loginSuccess) {
-            setRegistrationStatus('Успешный вход!');
+            setRegistrationStatus('Successful login!');
             setIsLoggedIn(true);
           } else {
-            setRegistrationStatus('Успешная регистрация!');
+            setRegistrationStatus('Successful registration!');
           }
-          console.log('Nickname and password saved successfully');
         } else {
           setRegistrationStatus(`Ошибка при регистрации или входе: ${response.data.error}`);
-          console.error('Failed to save nickname:', response.data.error);
         }
       } catch (error) {
         setRegistrationStatus(`Ошибка при регистрации или входе: ${error.message}`);
       }
     } else {
-      setRegistrationStatus('Никнейм и пароль не могут быть пустыми');
+      setRegistrationStatus('Nickname and password cannot be blank');
     }
   };
 
@@ -99,29 +98,33 @@ function App() {
     }
   };
 
-
   const handleSubmit = (event) => {
     event.preventDefault();
     const inputValue = inputRef.current.value.trim();
     const inputNickValue = inpuNickRef.current.value.trim();
-    if (inputValue && inputNickValue !== '') {
+    const inputPasswordValue = inputPasswordRef.current.value.trim();  
+
+    if (inputValue && inputNickValue && inputPasswordValue) {  
       const messageData = {
         message: inputValue,
         nickname: inputNickValue,
+        password: inputPasswordValue, 
       };
 
       ws.send(JSON.stringify(messageData));
 
       inputRef.current.value = '';
+    } else {
+      setRegistrationStatus('Cannot send message if nickname or password is empty');
     }
   };
-
 
   const handleKeyDown = (event) => {
     if (event.key === 'Enter') {
       handleSubmit(event);
     }
   };
+
 
   useEffect(() => {
     const handleOpen = () => {
@@ -171,7 +174,6 @@ function App() {
       handleOnline(response)
     };
 
-    // Очистка обработчиков при размонтировании компонента
     return () => {
       ws.onopen = null;
       ws.onclose = null;
@@ -192,7 +194,7 @@ function App() {
         <input autocomplete="off" id="inputNick" ref={inputPasswordRef} onKeyDown={handleKeyDown} />
 
         <button className='btn-nick' type='submit' onClick={handleSaveNickname}>
-          save
+        enter
         </button>
         <div className="registration-status">{registrationStatus}</div>
 
@@ -200,7 +202,7 @@ function App() {
       <div className='status' id="status" ref={statusRef}>
         {status}
         <div className='online' ref={onlineRef}>
-        {onlineUsers}
+          {onlineUsers}
         </div>
       </div>
       <div className='chat-window'>

@@ -10,7 +10,7 @@
   font-size: small;
   color: #69696a;
   gap: 10px;
-  width: fit-content;
+  width: 200px;
   height: 50px;
   display: flex;
   flex-direction: column;
