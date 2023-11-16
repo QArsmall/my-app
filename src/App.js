@@ -39,10 +39,8 @@ function App() {
       try {
         const response = await axios.post('http://localhost:5001/saveNickname', { nickname, password });
         if (response.data.success) {
-          console.log('test:', response.data.loginSuccess)
 
           if (response.data.loginSuccess) {
-            console.log('test:', response.data.success)
             setRegistrationStatus('Успешный вход!');
             setIsLoggedIn(true);
           } else {
@@ -55,11 +53,9 @@ function App() {
         }
       } catch (error) {
         setRegistrationStatus(`Ошибка при регистрации или входе: ${error.message}`);
-        console.error('Error while saving nickname:', error);
       }
     } else {
       setRegistrationStatus('Никнейм и пароль не могут быть пустыми');
-      console.error('Nickname and password cannot be empty');
     }
   };
 
