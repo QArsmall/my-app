@@ -6,6 +6,7 @@
   font-size: calc(10px + 2vmin);
   color: #848484;
 }
+
 .nickName {
   font-size: small;
   color: #69696a;
@@ -16,6 +17,7 @@
   flex-direction: column;
   margin: 15px;
 }
+
 .btn-nick {
   display: flex;
   padding: 5px;
@@ -30,30 +32,36 @@
   /* Добавляем плавный переход для рамки */
 
 }
+
 .btn-nick:hover {
   border: 1px solid #69696a;
 
   /* Изменяем рамку при наведении курсора */
 }
+
 #inputNick:focus {
   border: 1px solid #69696a;
 
   /* Изменяем рамку при наведении курсора */
 }
+
 #inputNick {
   width: 100%;
   outline: none;
+  padding: 5px;
   border: 1px solid #000000;
   border-radius: 4px;
-  box-sizing: border-box;
+  height: 40px;
   background-color: #000000;
   color: #69696a;
   cursor: pointer;
   transition: border 0.3s;
 }
+
 #inputNick:hover {
-  border: 1px solid  #69696a;
+  border: 1px solid #69696a;
 }
+
 .form-message {
   display: flex;
   width: 100%;
@@ -92,12 +100,16 @@
 }
 
 #input:hover {
-  border: 1px solid #69696a;;
+  border: 1px solid #69696a;
+  ;
   /* Изменяем рамку при наведении курсора */
 }
+
 #input:focus {
-  border: 1px solid #69696a;;
+  border: 1px solid #69696a;
+  ;
 }
+
 .status {
   width: 100px;
   display: flex;
@@ -128,7 +140,8 @@
   display: flex;
   margin-top: 10px;
   background-color: #282c34;
-  align-items: flex-end; /* изменение на flex-end */
+  align-items: flex-end;
+  /* изменение на flex-end */
   justify-content: flex-end;
   flex-direction: column;
   height: 60vh;
@@ -141,8 +154,10 @@
 #messages {
   display: flex;
   width: 100%;
-  flex-direction: column; /* изменение на column-reverse */
-  max-height: 60vh; /* или любое другое значение, если нужно ограничить высоту */
+  flex-direction: column;
+  /* изменение на column-reverse */
+  max-height: 60vh;
+  /* или любое другое значение, если нужно ограничить высоту */
   overflow-y: auto;
   padding-right: 5px;
   align-items: flex-end;
@@ -171,6 +186,7 @@
   width: fit-content;
   height: 100%;
 }
+
 .block-message-other {
   display: flex;
   overflow-y: auto;
@@ -215,4 +231,13 @@
   padding: 5px 7px 5px 7px;
   border: 1px solid #69696a;
   border-radius: 2px;
+}
+.privat {
+  display: flex;
+  width: 30%;
+}
+#privat {
+  width: 100%;
+  height: 400px;
+  margin-left: 100px;
 }

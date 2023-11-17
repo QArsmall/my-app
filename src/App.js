@@ -1,83 +1,97 @@
-import React, { useRef, useState, useEffect } from 'react';
-import ReactDOM from 'react-dom';
-import './App.css';
-import ReconnectingWebSocket from 'reconnecting-websocket';
-import axios from 'axios';
+import React, { useRef, useState, useEffect } from "react";
+import ReactDOM from "react-dom";
+import "./App.css";
+import ReconnectingWebSocket from "reconnecting-websocket";
+import axios from "axios";
 
-
-
-let counter = 0
+let counter = 0;
 let ws;
 let clientId; // объявление переменной clientId за пределами функции компонента
-let clientNick = 'anonymous';
+let clientNick = "anonymous";
 
 function App() {
   if (!counter) {
-    ws = new WebSocket('ws://192.168.1.118:5001');
-
-  };
+    ws = new WebSocket("ws://192.168.1.118:5001");
+  }
   // if (!counter) { ws = new WebSocket('ws://localhost:3023');
   //  };
-  counter += 1
+  counter += 1;
   const statusRef = useRef(null);
   const messagesRef = useRef(null);
-  const inpuNickRef = useRef(null)
+  const inpuNickRef = useRef(null);
   const inputRef = useRef(null);
-  const onlineRef = useRef(null)
-  const inputPasswordRef = useRef(null)
-  const [status, setStatus] = useState('');
+  const onlineRef = useRef(null);
+  const inputPasswordRef = useRef(null);
+  const [status, setStatus] = useState("");
   const [onlineUsers, setOnlineUsers] = useState(0);
-  const [registrationStatus, setRegistrationStatus] = useState('');
+  const [registrationStatus, setRegistrationStatus] = useState("");
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-
-
+  const enterButtonRef = useRef(null);
 
   const handleSaveNickname = async () => {
     const nickname = inpuNickRef.current.value.trim();
     const password = inputPasswordRef.current.value.trim();
 
-    if (nickname && password !== '') {
+    if (nickname && password !== "") {
       try {
-        const response = await axios.post('http://localhost:5001/saveNickname', { nickname, password });
+        const response = await axios.post(
+          "http://localhost:5001/saveNickname",
+          { nickname, password }
+        );
         if (response.data.success) {
-
           if (response.data.loginSuccess) {
-            setRegistrationStatus('Successful login!');
+            setRegistrationStatus("Successful login!");
             setIsLoggedIn(true);
+            hiddenLoginMenu();
           } else {
-            setRegistrationStatus('Successful registration!');
+            setRegistrationStatus("Successful registration!");
+            hiddenLoginMenu();
           }
         } else {
-          setRegistrationStatus(`Ошибка при регистрации или входе: ${response.data.error}`);
+          setRegistrationStatus(
+            `Ошибка при регистрации или входе: ${response.data.error}`
+          );
         }
       } catch (error) {
-        setRegistrationStatus(`Ошибка при регистрации или входе: ${error.message}`);
+        setRegistrationStatus(
+          `Ошибка при регистрации или входе: ${error.message}`
+        );
       }
     } else {
-      setRegistrationStatus('Nickname and password cannot be blank');
+      setRegistrationStatus("Nickname and password cannot be blank");
     }
   };
-
+  const hiddenLoginMenu = () => {
+    if (inputPasswordRef.current) {
+      inputPasswordRef.current.style.display = "none";
+    }
+    if (enterButtonRef.current) {
+      enterButtonRef.current.style.display = "none";
+    }
+    if (inpuNickRef.current) {
+      inpuNickRef.current.disabled = true;
+    }
+  };
   const printMessage = (value, className, nickname) => {
-    if (messagesRef.current && value && typeof value === 'string') {
-      const blockMessageDiv = document.createElement('div');
-      blockMessageDiv.classList.add('block-message');
+    if (messagesRef.current && value && typeof value === "string") {
+      const blockMessageDiv = document.createElement("div");
+      blockMessageDiv.classList.add("block-message");
 
-      const nickDiv = document.createElement('div');
-      nickDiv.textContent = nickname + ':';
+      const nickDiv = document.createElement("div");
+      nickDiv.textContent = nickname + ":";
 
       if (nickname === undefined) {
-        nickDiv.textContent = '';
+        nickDiv.textContent = "";
       }
 
-      nickDiv.classList.add('nick');
+      nickDiv.classList.add("nick");
       blockMessageDiv.appendChild(nickDiv);
 
-      const messageDiv = document.createElement('div');
-      messageDiv.className = 'message'
-      blockMessageDiv.className = className
-      const timeDiv = document.createElement('div');
-      timeDiv.className = 'message-time';
+      const messageDiv = document.createElement("div");
+      messageDiv.className = "message";
+      blockMessageDiv.className = className;
+      const timeDiv = document.createElement("div");
+      timeDiv.className = "message-time";
       const currentTime = new Date();
       const hours = currentTime.getHours();
       const minutes = currentTime.getMinutes();
@@ -92,9 +106,9 @@ function App() {
       messagesRef.current.appendChild(blockMessageDiv);
       messagesRef.current.scrollTo({
         top: messagesRef.current.scrollHeight,
-        behavior: 'smooth',
+        behavior: "smooth",
       });
-      inputRef.current.value = '';
+      inputRef.current.value = "";
     }
   };
 
@@ -102,42 +116,42 @@ function App() {
     event.preventDefault();
     const inputValue = inputRef.current.value.trim();
     const inputNickValue = inpuNickRef.current.value.trim();
-    const inputPasswordValue = inputPasswordRef.current.value.trim();  
+    const inputPasswordValue = inputPasswordRef.current.value.trim();
 
-    if (inputValue && inputNickValue && inputPasswordValue) {  
+    if (inputValue && inputNickValue && inputPasswordValue) {
       const messageData = {
         message: inputValue,
         nickname: inputNickValue,
-        password: inputPasswordValue, 
+        password: inputPasswordValue,
       };
 
       ws.send(JSON.stringify(messageData));
 
-      inputRef.current.value = '';
+      inputRef.current.value = "";
     } else {
-      setRegistrationStatus('Cannot send message if nickname or password is empty');
+      setRegistrationStatus(
+        "Cannot send message if nickname or password is empty"
+      );
     }
   };
 
   const handleKeyDown = (event) => {
-    if (event.key === 'Enter') {
+    if (event.key === "Enter") {
       handleSubmit(event);
     }
   };
 
-
   useEffect(() => {
     const handleOpen = () => {
-      setStatus('online...');
+      setStatus("online...");
       getOnlineUsers();
-      statusRef.current.className = 'status';
-
+      statusRef.current.className = "status";
     };
 
     const handleClose = () => {
-      setStatus('disconnected...');
-      statusRef.current.className = 'disconnected-style';
-      setOnlineUsers('∞')
+      setStatus("disconnected...");
+      statusRef.current.className = "disconnected-style";
+      setOnlineUsers("∞");
     };
     const handleOnline = (response) => {
       const parsedResponse = JSON.parse(response.data);
@@ -150,20 +164,32 @@ function App() {
         clientId = parsedResponse.clientId;
       }
       try {
-        const messageType = parsedResponse.type || '';
+        const messageType = parsedResponse.type || "";
         const clientIdServer = parsedResponse.origin;
-        if (messageType === 'server') {
-          printMessage(parsedResponse.data, 'block-message-server', clientIdServer);
-        } else if (messageType === 'client' && clientIdServer === clientId) {
-          printMessage(parsedResponse.data, 'block-message', inpuNickRef.current.value);
-        } else if (messageType === 'client' && clientIdServer !== clientId) {
-          printMessage(parsedResponse.data, 'block-message-other', parsedResponse.nickname);
+        if (messageType === "server") {
+          printMessage(
+            parsedResponse.data,
+            "block-message-server",
+            clientIdServer
+          );
+        } else if (messageType === "client" && clientIdServer === clientId) {
+          printMessage(
+            parsedResponse.data,
+            "block-message",
+            inpuNickRef.current.value
+          );
+        } else if (messageType === "client" && clientIdServer !== clientId) {
+          printMessage(
+            parsedResponse.data,
+            "block-message-other",
+            parsedResponse.nickname
+          );
         }
-        if (parsedResponse.type === 'getOnlineUsers') {
+        if (parsedResponse.type === "getOnlineUsers") {
           setOnlineUsers(parsedResponse.online);
         }
       } catch (error) {
-        console.error('Ошибка при разборе JSON:', error);
+        console.error("Ошибка при разборе JSON:", error);
       }
     };
 
@@ -171,7 +197,7 @@ function App() {
     ws.onclose = handleClose;
     ws.onmessage = (response) => {
       handleMessage(response);
-      handleOnline(response)
+      handleOnline(response);
     };
 
     return () => {
@@ -181,40 +207,65 @@ function App() {
     };
   }, []);
   const getOnlineUsers = () => {
-    ws.send(JSON.stringify({ type: 'getOnlineUsers' }));
+    ws.send(JSON.stringify({ type: "getOnlineUsers" }));
   };
 
   return (
-    <header className='App-header'>
+    <header className="App-header">
+      <div className="nickName">
+        <div>your nickname:</div>
+        <input
+          id="inputNick"
+          ref={inpuNickRef}
+          onKeyDown={handleKeyDown}
+          placeholder="nickname"
+        />
+        <input
+          id="inputNick"
+          type="password"
+          ref={inputPasswordRef}
+          onKeyDown={handleKeyDown}
+          placeholder="password"
+        />
 
-      <div className='nickName'>
-        <div>nickname:</div>
-        <input  id="inputNick" ref={inpuNickRef} onKeyDown={handleKeyDown} />
-        <div>password:</div>
-        <input id="inputNick" ref={inputPasswordRef} onKeyDown={handleKeyDown} />
-
-        <button className='btn-nick' type='submit' onClick={handleSaveNickname}>
-        enter
+        <button
+          className="btn-nick"
+          type="submit"
+          ref={enterButtonRef}
+          onClick={handleSaveNickname}
+        >
+          enter
         </button>
         <div className="registration-status">{registrationStatus}</div>
-
       </div>
-      <div className='status' id="status" ref={statusRef}>
+      <div className="status" id="status" ref={statusRef}>
         {status}
-        <div className='online' ref={onlineRef}>
+        <div className="online" ref={onlineRef}>
           {onlineUsers}
         </div>
       </div>
-      <div className='chat-window'>
-        <div id="messages" ref={messagesRef}>
-        </div>
+      <div className="chat-window">
+        <div id="messages" ref={messagesRef}></div>
 
-        <form onSubmit={handleSubmit} className='form-message'>
+        <form onSubmit={handleSubmit} className="form-message">
           <input id="input" ref={inputRef} onKeyDown={handleKeyDown} />
-          <button className='btn-send' type='submit'>
+          <button className="btn-send" type="submit">
             Send
           </button>
         </form>
+      </div>
+      <div className="privat" >
+        {" "}
+        <div id="privat" className="chat-window">
+          <div id="messages"></div>
+
+          <form  className="form-message">
+            <input id="input"  />
+            <button className="btn-send" type="submit">
+              Send
+            </button>
+          </form>
+        </div>
       </div>
     </header>
   );
