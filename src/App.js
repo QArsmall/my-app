@@ -27,6 +27,11 @@ function App() {
   const [registrationStatus, setRegistrationStatus] = useState("");
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const enterButtonRef = useRef(null);
+  const [isChatFormVisible, setIsChatFormVisible] = useState(false);
+
+  const toggleChatForm = () => {
+    setIsChatFormVisible(!isChatFormVisible);
+  };
 
   const handleSaveNickname = async () => {
     const nickname = inpuNickRef.current.value.trim();
@@ -117,30 +122,49 @@ function App() {
     const inputValue = inputRef.current.value.trim();
     const inputNickValue = inpuNickRef.current.value.trim();
     const inputPasswordValue = inputPasswordRef.current.value.trim();
-
+  
     if (inputValue && inputNickValue && inputPasswordValue) {
       const messageData = {
         message: inputValue,
         nickname: inputNickValue,
         password: inputPasswordValue,
       };
-
+  
+      // Добавление упоминаний к сообщению
+      const mentionedUsers = findMentionedUsers(inputValue);
+      if (mentionedUsers.length > 0) {
+        messageData.mentions = mentionedUsers;
+      }
+  
       ws.send(JSON.stringify(messageData));
-
+  
       inputRef.current.value = "";
     } else {
-      setRegistrationStatus(
-        "Cannot send message if nickname or password is empty"
-      );
+      setRegistrationStatus("Cannot send message if nickname or password is empty");
     }
   };
+  
 
   const handleKeyDown = (event) => {
     if (event.key === "Enter") {
       handleSubmit(event);
     }
   };
-
+  const findMentionedUsers = (message) => {
+    const mentionedUsers = [];
+    const words = message.split(" ");
+    
+    for (const word of words) {
+      if (word.startsWith("@")) {
+        // Извлечение ника из упоминания и добавление в массив
+        const mentionedUser = word.slice(1);
+        mentionedUsers.push(mentionedUser);
+        console.log('mentionedUsers', mentionedUsers)
+      }
+    }
+  
+    return mentionedUsers;
+  };
   useEffect(() => {
     const handleOpen = () => {
       setStatus("online...");
@@ -159,7 +183,7 @@ function App() {
     };
     const handleMessage = (response) => {
       const parsedResponse = JSON.parse(response.data);
-
+  
       if (!clientId) {
         clientId = parsedResponse.clientId;
       }
@@ -182,6 +206,13 @@ function App() {
           printMessage(
             parsedResponse.data,
             "block-message-other",
+            parsedResponse.nickname
+          );
+        } else if (messageType === "privateMessage" && clientIdServer === clientId) {
+          // Обработка приватных сообщений от сервера
+          printMessage(
+            parsedResponse.data,
+            "block-message-private",
             parsedResponse.nickname
           );
         }
@@ -254,19 +285,24 @@ function App() {
           </button>
         </form>
       </div>
-      <div className="privat" >
-        {" "}
-        <div id="privat" className="chat-window">
-          <div id="messages"></div>
-
-          <form  className="form-message">
-            <input id="input"  />
-            <button className="btn-send" type="submit">
-              Send
-            </button>
-          </form>
-        </div>
+      <div className="privat">
+      <button className="btn-privat" onClick={toggleChatForm}>
+        Open Chat
+      </button>
+      <div
+        id="privat"
+        className={isChatFormVisible ? "show" : ""}
+      >
+        <div id="messages"></div>
+        <form className="form-message">
+          <input id="input" />
+          <button className="btn-send" type="submit">
+            Send
+          </button>
+        </form>
       </div>
+
+    </div>
     </header>
   );
 }
