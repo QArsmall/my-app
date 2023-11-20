@@ -208,7 +208,7 @@ function App() {
             "block-message-other",
             parsedResponse.nickname
           );
-        } else if (messageType === "privateMessage" && clientIdServer === clientId) {
+        } else if (messageType === "privateMessage") {
           // Обработка приватных сообщений от сервера
           printMessage(
             parsedResponse.data,
@@ -238,7 +238,7 @@ function App() {
     };
   }, []);
   const getOnlineUsers = () => {
-    ws.send(JSON.stringify({ type: "getOnlineUsers" }));
+    ws.send(JSON.stringify({ type: "getOnlineUsers"}));
   };
 
   return (
