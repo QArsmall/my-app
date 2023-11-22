@@ -4,7 +4,7 @@
   flex-direction: row;
   font-size: calc(10px + 2vmin);
   color: #dcdcdc;
-  background-color: #11151b;
+  background-color: #210f0f;
   gap: 10px;
 }
 
@@ -28,8 +28,8 @@
   justify-content: center;
   font-size: 20px;
   color: #dcdcdc;
-  background-color: #000000;
-  border: 1px solid #000000;
+  background-color: rgb(0, 0, 0);
+  border: 1px solid #ee9d9d;
   border-radius: 2px;
   cursor: pointer;
   transition: border 0.3s;
@@ -73,8 +73,9 @@
 .btn-send {
   color: #dcdcdc;
   background-color: #000000;
-  border: 1px solid #dcdcdc;
-  border-radius: 2px;
+  border: 1px solid #69696a;
+  width: 100px;
+  border-radius: 10px;
   cursor: pointer;
   font-size: 20px;
   transition: border 0.3s;
@@ -83,7 +84,7 @@
 }
 
 .btn-send:hover {
-  border: 1px solid #69696a;
+  border: 1px solid #000000;
   /* Изменяем рамку при наведении курсора */
 }
 
@@ -91,11 +92,12 @@
   width: 100%;
   padding: 10px;
   margin-right: 10px;
-  border: 1px solid #dcdcdc;
-  border-radius: 4px;
+  border: 1px solid #69696a;
+  border-radius: 10px;
   box-sizing: border-box;
   height: 50px;
   background-color: #000000;
+  font-size: 25px;
   color: #dcdcdc;
   cursor: pointer;
   transition: border 0.3s;
@@ -103,7 +105,7 @@
 }
 
 #input:hover {
-  border: 1px solid #69696a;
+  border: 1px solid #000000;
   ;
   /* Изменяем рамку при наведении курсора */
 }
@@ -152,8 +154,16 @@
   border-radius: 20px;
   padding: 10px;
   border: 1px solid #69696a;
+  box-shadow: 0 0 10px rgba(216, 205, 255, 0.4);
 }
-
+@keyframes flash {
+  0% {   box-shadow: 0 0 10px rgba(216, 205, 255, 0.4); }
+  50% { box-shadow: 0 0 20px rgba(216, 205, 255, 0.9); }
+  100% { box-shadow: 0 0 10px rgba(216, 205, 255, 0.4); }
+}
+.flash {
+  animation: flash 1s;
+}
 #messages {
   display: flex;
   width: 100%;
@@ -202,6 +212,7 @@
   border-radius: 10px;
   justify-content: flex-start;
   align-self: flex-start;
+  margin-left: 20px;
 }
 
 .block-message-server {
@@ -255,4 +266,7 @@ flex-direction: column;
   border-radius: 10px;
   color: rgb(164, 18, 162)
   /* Другие стили по вашему усмотрению */
+}
+.registration-status {
+  font-size: 25px;
 }

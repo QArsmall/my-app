@@ -4,18 +4,14 @@ import "./App.css";
 import ReconnectingWebSocket from "reconnecting-websocket";
 import axios from "axios";
 
-
 let counter = 0;
 let ws;
 let clientId; // объявление переменной clientId за пределами функции компонента
-let clientNick = "anonymous";
 
 function App() {
   if (!counter) {
-    ws = new WebSocket("ws://13.53.182.168:5023");
+    ws = new WebSocket("ws://192.168.1.169:5023");
   }
-  // if (!counter) { ws = new WebSocket('ws://localhost:3023');
-  //  };
   counter += 1;
   const statusRef = useRef(null);
   const messagesRef = useRef(null);
@@ -28,11 +24,11 @@ function App() {
   const [registrationStatus, setRegistrationStatus] = useState("");
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const enterButtonRef = useRef(null);
-  const [isChatFormVisible, setIsChatFormVisible] = useState(false);
+  const [messageInputs, setMessageInputs] = useState({});
+  const passwordRef = useRef(null);
+  const [isChatFlashing, setIsChatFlashing] = useState(false);
+  const [nickname, setNickname] = useState(""); // Новое состояние для никнейма
 
-  const toggleChatForm = () => {
-    setIsChatFormVisible(!isChatFormVisible);
-  };
 
   const handleSaveNickname = async () => {
     const nickname = inpuNickRef.current.value.trim();
@@ -41,7 +37,7 @@ function App() {
     if (nickname && password !== "") {
       try {
         const response = await axios.post(
-          "http://13.53.182.168:5023/saveNickname",
+          "http://192.168.1.169:5023/saveNickname",
           { nickname, password }
         );
         if (response.data.success) {
@@ -49,9 +45,13 @@ function App() {
             setRegistrationStatus("Successful login!");
             setIsLoggedIn(true);
             hiddenLoginMenu();
+            setNickname(nickname); // Обновляем состояние никнейма
+
           } else {
             setRegistrationStatus("Successful registration!");
             hiddenLoginMenu();
+            setNickname(nickname); // Обновляем состояние никнейма
+
           }
         } else {
           setRegistrationStatus(
@@ -73,12 +73,14 @@ function App() {
     }
     if (enterButtonRef.current) {
       enterButtonRef.current.style.display = "none";
+      passwordRef.current.style.display = "none";
     }
     if (inpuNickRef.current) {
-      inpuNickRef.current.disabled = true;
+      inpuNickRef.current.style.display = "none"
     }
   };
   const printMessage = (value, className, nickname) => {
+    
     if (messagesRef.current && value && typeof value === "string") {
       const blockMessageDiv = document.createElement("div");
       blockMessageDiv.classList.add("block-message");
@@ -114,8 +116,12 @@ function App() {
         top: messagesRef.current.scrollHeight,
         behavior: "smooth",
       });
-      inputRef.current.value = "";
     }
+    setIsChatFlashing(true);
+    setTimeout(() => {
+      // Удалим класс flash через 1.5 секунды (длительность анимации + запас)
+      setIsChatFlashing(false);
+    }, 1500);
   };
 
   const handleSubmit = (event) => {
@@ -123,28 +129,32 @@ function App() {
     const inputValue = inputRef.current.value.trim();
     const inputNickValue = inpuNickRef.current.value.trim();
     const inputPasswordValue = inputPasswordRef.current.value.trim();
-  
+
     if (inputValue && inputNickValue && inputPasswordValue) {
       const messageData = {
         message: inputValue,
         nickname: inputNickValue,
         password: inputPasswordValue,
       };
-  
-      // Добавление упоминаний к сообщению
+
       const mentionedUsers = findMentionedUsers(inputValue);
       if (mentionedUsers.length > 0) {
         messageData.mentions = mentionedUsers;
       }
-  
+
       ws.send(JSON.stringify(messageData));
-  
-      inputRef.current.value = "";
+
+      setMessageInputs((prevInputs) => ({
+        ...prevInputs,
+        [clientId]: "", // Очищаем поле ввода только для текущего клиента
+      }));
+      console.log("clientID", clientId);
     } else {
-      setRegistrationStatus("Cannot send message if nickname or password is empty");
+      setRegistrationStatus(
+        "Cannot send message if nickname or password is empty"
+      );
     }
   };
-  
 
   const handleKeyDown = (event) => {
     if (event.key === "Enter") {
@@ -154,16 +164,16 @@ function App() {
   const findMentionedUsers = (message) => {
     const mentionedUsers = [];
     const words = message.split(" ");
-    
+
     for (const word of words) {
       if (word.startsWith("@")) {
         // Извлечение ника из упоминания и добавление в массив
         const mentionedUser = word.slice(1);
         mentionedUsers.push(mentionedUser);
-        console.log('mentionedUsers', mentionedUsers)
+        console.log("mentionedUsers", mentionedUsers);
       }
     }
-  
+
     return mentionedUsers;
   };
   useEffect(() => {
@@ -184,7 +194,7 @@ function App() {
     };
     const handleMessage = (response) => {
       const parsedResponse = JSON.parse(response.data);
-  
+
       if (!clientId) {
         clientId = parsedResponse.clientId;
       }
@@ -239,19 +249,20 @@ function App() {
     };
   }, []);
   const getOnlineUsers = () => {
-    ws.send(JSON.stringify({ type: "getOnlineUsers"}));
+    ws.send(JSON.stringify({ type: "getOnlineUsers" }));
   };
 
   return (
     <header className="App-header">
       <div className="nickName">
-        <div>your nickname:</div>
+        <div className="title-input">Your nickname: {nickname}</div>
         <input
           id="inputNick"
           ref={inpuNickRef}
           onKeyDown={handleKeyDown}
           placeholder="nickname"
         />
+        <div className="title-input" ref={passwordRef}>Your password: </div>
         <input
           id="inputNick"
           type="password"
@@ -276,11 +287,22 @@ function App() {
           {onlineUsers}
         </div>
       </div>
-      <div className="chat-window">
+      <div className={`chat-window ${isChatFlashing ? 'flash' : ''}`}>
         <div id="messages" ref={messagesRef}></div>
 
         <form onSubmit={handleSubmit} className="form-message">
-          <input id="input" ref={inputRef} onKeyDown={handleKeyDown} />
+          <input
+            id="input"
+            ref={inputRef}
+            value={messageInputs[clientId] || ""}
+            onChange={(e) =>
+              setMessageInputs((prevInputs) => ({
+                ...prevInputs,
+                [clientId]: e.target.value,
+              }))
+            }
+            onKeyDown={handleKeyDown}
+          />
           <button className="btn-send" type="submit">
             Send
           </button>

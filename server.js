@@ -111,7 +111,7 @@ wss.on("connection", (ws) => {
 });
 
 app.use((req, res, next) => {
-  res.header("Access-Control-Allow-Origin", "http://13.53.182.168:3000");
+  res.header("Access-Control-Allow-Origin", "http://localhost:3000");
   res.header(
     "Access-Control-Allow-Headers",
     "Origin, X-Requested-With, Content-Type, Accept"
@@ -165,7 +165,6 @@ app.post("/saveNickname", express.json(), (req, res) => {
 });
 
 const PORT = 5023;
-console.log('app', app._router)
 server.listen(PORT, () => {
   console.log("Server is listening on port:", PORT);
 });
