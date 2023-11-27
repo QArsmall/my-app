@@ -10,7 +10,7 @@ let clientId; // объявление переменной clientId за пре�
 
 function App() {
   if (!counter) {
-    ws = new WebSocket("ws://192.168.1.169:5023");
+    ws = new WebSocket("ws://13.53.182.168:5023");
   }
   counter += 1;
   const statusRef = useRef(null);
@@ -37,7 +37,7 @@ function App() {
     if (nickname && password !== "") {
       try {
         const response = await axios.post(
-          "http://192.168.1.169:5023/saveNickname",
+          "http://13.53.182.168:5023/saveNickname",
           { nickname, password }
         );
         if (response.data.success) {
@@ -254,6 +254,14 @@ function App() {
 
   return (
     <header className="App-header">
+
+      <div className="status" id="status" ref={statusRef}>
+        {status}
+        <div className="online" ref={onlineRef}>
+          {onlineUsers}
+        </div>
+      </div>
+      <div className={`chat-window ${isChatFlashing ? 'flash' : ''}`}>
       <div className="nickName">
         <div className="title-input">Your nickname: {nickname}</div>
         <input
@@ -281,13 +289,6 @@ function App() {
         </button>
         <div className="registration-status">{registrationStatus}</div>
       </div>
-      <div className="status" id="status" ref={statusRef}>
-        {status}
-        <div className="online" ref={onlineRef}>
-          {onlineUsers}
-        </div>
-      </div>
-      <div className={`chat-window ${isChatFlashing ? 'flash' : ''}`}>
         <div id="messages" ref={messagesRef}></div>
 
         <form onSubmit={handleSubmit} className="form-message">

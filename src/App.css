@@ -273,13 +273,16 @@
     @media screen and (max-width: 1024px) {
       .App-header {
         flex-direction: column;
+        min-height: 100vh;
         padding: 10px; /* Пространство вокруг элементов для лучшей читаемости */
       }
     
       .nickName {
-        width: 100%;
-        margin: 10px 0; /* Добавляем отступ сверху и снизу */
-      }
+        width: 95%;
+        padding: 20px;
+        height: auto;
+
+ }
     
       .btn-nick {
         width: 100%;
@@ -328,8 +331,9 @@
       }
     
       .chat-window {
-        width: 100%;
+        width: 98%;
         margin: 10px 0;
+        justify-content: flex-start;
       }
     
       #messages {
@@ -339,11 +343,24 @@
       .message {
         margin: 10px 0;
       }
-    
+      .message-time {
+        font-size: 26px;
+      }
       .block-message-other,
       .block-message-server,
       .block-message,
       .block-message-private {
-        max-width: 100%; /* Растягиваем блоки сообщений на всю ширину */
+        
+      }
+      .nick {
+        font-size: 40px;
+      }
+      .message {
+        margin: 0;
+        font-size: 45px;
+      }
+      .form-message {
+        width: 95%;
+        align-self: center;
       }
     }
