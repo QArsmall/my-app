@@ -2,12 +2,17 @@ const express = require("express");
 const http = require("http");
 const WebSocket = require("ws");
 const fs = require("fs");
+const bcrypt = require("bcrypt");
+
+const { handleUpload } = require('./imageHandler');
 
 const app = express();
 const server = http.createServer(app);
 const wss = new WebSocket.Server({ server });
 let counter = 0;
 const activeUsers = [];
+// Загрузка изображения
+app.post('/upload', handleUpload);
 
 function generateClientId() {
   return Math.random().toString(36).substr(2, 9);
@@ -30,12 +35,13 @@ const broadcast = (message) => {
   });
 };
 
-wss.on("connection", (ws) => {
-  console.log("connection");
+wss.on("connection", (ws, req) => {
+  const clientIp = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
+  console.log("Connection from IP:", clientIp);
 
   ws.clientId = generateClientId();
   counter += 1;
-  console.log("online", counter);
+  console.log("Online:", counter, "IP:", clientIp);
   updateOnlineUsers();
 
   ws.on("message", (message) => {
@@ -53,6 +59,14 @@ wss.on("connection", (ws) => {
           );
 
           if (targetUser) {
+            ws.send(
+              JSON.stringify({
+                  data: messageText,
+                  origin: nickname, // Отправитель видит свои приватные сообщения
+                  type: "privateMessage",
+                  nickname,
+              })
+          );
             // Отправляем сообщение только целевому пользователю
             targetUser.ws.send(
               JSON.stringify({
@@ -102,7 +116,7 @@ wss.on("connection", (ws) => {
 
   ws.send(
     JSON.stringify({
-      data: "hello world",
+      data: "Hello world",
       origin: "server",
       type: "server",
       clientId: ws.clientId,
@@ -111,7 +125,7 @@ wss.on("connection", (ws) => {
 });
 
 app.use((req, res, next) => {
-  res.header("Access-Control-Allow-Origin", "13.53.182.168:3000");
+  res.header("Access-Control-Allow-Origin", "http://13.53.182.168:3000");
   res.header(
     "Access-Control-Allow-Headers",
     "Origin, X-Requested-With, Content-Type, Accept"
@@ -119,44 +133,63 @@ app.use((req, res, next) => {
   next();
 });
 
-app.post("/saveNickname", express.json(), (req, res) => {
+app.post("/saveNickname", express.json(), async (req, res) => {
   try {
     const { nickname, password } = req.body;
     if (!nickname || !password) {
       throw new Error("Nickname or password is missing");
     }
 
-    const filePath = "nicknames.txt";
+    const clientIp =
+      req.headers["x-forwarded-for"] || req.connection.remoteAddress;
+
+    console.log("Registration request from IP:", clientIp);
+
+    const filePath = "nicknames.json";
     let fileContent = "";
 
     if (fs.existsSync(filePath)) {
       fileContent = fs.readFileSync(filePath, "utf-8");
     }
 
-    const existingUser = fileContent
-      .split("\n")
-      .map((line) => line.split(" = ")[0].trim())
-      .find((existingNickname) => existingNickname === nickname);
+    const users = JSON.parse(fileContent);
+
+    const existingUser = users.find((user) => user.nickname === nickname);
 
     if (existingUser) {
-      console.log("Successful login");
-      res
-        .status(200)
-        .json({
+      const passwordMatch = await bcrypt.compare(
+        password,
+        existingUser.password
+      );
+
+      if (passwordMatch) {
+        console.log("Successful login");
+        res.status(200).json({
           success: true,
           loginSuccess: true,
           message: "Successful login",
         });
-    } else {
-      fs.writeFileSync(filePath, `${nickname} = ${password}\n`, { flag: "a" });
-      console.log("Successful registration");
-      res
-        .status(200)
-        .json({
-          success: true,
+      } else {
+        console.log("Invalid password");
+        res.status(401).json({
+          success: false,
           loginSuccess: false,
-          message: "Successful registration",
+          error: "Invalid password",
         });
+      }
+    } else {
+      const hashedPassword = await bcrypt.hash(password, 10);
+      users.push({ nickname, password: hashedPassword });
+
+      fs.writeFileSync(filePath, JSON.stringify(users, null, 2), {
+        flag: "w",
+      });
+      console.log("Successful registration");
+      res.status(200).json({
+        success: true,
+        loginSuccess: false,
+        message: "Successful registration",
+      });
     }
   } catch (error) {
     console.error("Error handling request:", error);

@@ -228,6 +228,7 @@ function App() {
           );
         } else if (messageType === "privateMessage") {
           // Обработка приватных сообщений от сервера
+          console.log("Received private message:", parsedResponse);
           printMessage(
             parsedResponse.data,
             "block-message-private",
