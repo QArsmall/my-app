@@ -28,7 +28,7 @@ function App() {
   const passwordRef = useRef(null);
   const [isChatFlashing, setIsChatFlashing] = useState(false);
   const [nickname, setNickname] = useState(""); // Новое состояние для никнейма
-
+  const [currentTime, setCurrentTime] = useState("");
 
   const handleSaveNickname = async () => {
     const nickname = inpuNickRef.current.value.trim();
@@ -46,12 +46,10 @@ function App() {
             setIsLoggedIn(true);
             hiddenLoginMenu();
             setNickname(nickname); // Обновляем состояние никнейма
-
           } else {
             setRegistrationStatus("Successful registration!");
             hiddenLoginMenu();
             setNickname(nickname); // Обновляем состояние никнейма
-
           }
         } else {
           setRegistrationStatus(
@@ -76,11 +74,10 @@ function App() {
       passwordRef.current.style.display = "none";
     }
     if (inpuNickRef.current) {
-      inpuNickRef.current.style.display = "none"
+      inpuNickRef.current.style.display = "none";
     }
   };
   const printMessage = (value, className, nickname) => {
-    
     if (messagesRef.current && value && typeof value === "string") {
       const blockMessageDiv = document.createElement("div");
       blockMessageDiv.classList.add("block-message");
@@ -101,9 +98,9 @@ function App() {
       const timeDiv = document.createElement("div");
       timeDiv.className = "message-time";
       const currentTime = new Date();
-      const hours = currentTime.getHours();
-      const minutes = currentTime.getMinutes();
-      const seconds = currentTime.getSeconds();
+      const hours = currentTime.getHours().toString().padStart(2, '0');
+      const minutes = currentTime.getMinutes().toString().padStart(2, '0');
+      const seconds = currentTime.getSeconds().toString().padStart(2, '0');
       timeDiv.textContent = `${hours}:${minutes}:${seconds}`;
 
       messageDiv.textContent = value;
@@ -177,6 +174,16 @@ function App() {
     return mentionedUsers;
   };
   useEffect(() => {
+    const updateCurrentTime = () => {
+      const currentTime = new Date();
+      const hours = currentTime.getHours().toString().padStart(2, "0");
+      const minutes = currentTime.getMinutes().toString().padStart(2, "0");
+      const seconds = currentTime.getSeconds().toString().padStart(2, "0");
+      setCurrentTime(`${hours}:${minutes}:${seconds}`);
+    };
+    updateCurrentTime();
+    const intervalId = setInterval(updateCurrentTime, 1000);
+
     const handleOpen = () => {
       setStatus("online...");
       getOnlineUsers();
@@ -246,6 +253,7 @@ function App() {
       ws.onopen = null;
       ws.onclose = null;
       ws.onmessage = null;
+      clearInterval(intervalId);
     };
   }, []);
   const getOnlineUsers = () => {
@@ -254,60 +262,59 @@ function App() {
 
   return (
     <header className="App-header">
-
       <div className="status" id="status" ref={statusRef}>
         {status}
         <div className="online" ref={onlineRef}>
           {onlineUsers}
         </div>
+        <div className="time-now">{currentTime}</div>
       </div>
-      <div className={`chat-window ${isChatFlashing ? 'flash' : ''}`}>
-      <div className="nickName">
-        <div className="title-input">Your nickname: {nickname}</div>
-        <input
-          id="inputNick"
-          ref={inpuNickRef}
-          onKeyDown={handleKeyDown}
-          placeholder="nickname"
-        />
-        <div className="title-input" ref={passwordRef}>Your password: </div>
-        <input
-          id="inputNick"
-          type="password"
-          ref={inputPasswordRef}
-          onKeyDown={handleKeyDown}
-          placeholder="password"
-        />
-
-        <button
-          className="btn-nick"
-          type="submit"
-          ref={enterButtonRef}
-          onClick={handleSaveNickname}
-        >
-          Enter
-        </button>
-        <div className="registration-status">{registrationStatus}</div>
-      </div>
-        <div id="messages" ref={messagesRef}></div>
-
-        <form onSubmit={handleSubmit} className="form-message">
+      <div className={`chat-window ${isChatFlashing ? "flash" : ""}`}>
+        <div className="nickName">
+          <div className="title-input">Your nickname: {nickname}</div>
+          <input id="inputNick" ref={inpuNickRef} onKeyDown={handleKeyDown} />
+          <div className="title-input" ref={passwordRef}>
+            Your password:{" "}
+          </div>
           <input
-            id="input"
-            ref={inputRef}
-            value={messageInputs[clientId] || ""}
-            onChange={(e) =>
-              setMessageInputs((prevInputs) => ({
-                ...prevInputs,
-                [clientId]: e.target.value,
-              }))
-            }
+            id="inputNick"
+            type="password"
+            ref={inputPasswordRef}
             onKeyDown={handleKeyDown}
           />
-          <button className="btn-send" type="submit">
-            Send
+
+          <button
+            className="btn-nick"
+            type="submit"
+            ref={enterButtonRef}
+            onClick={handleSaveNickname}
+          >
+            Enter
           </button>
-        </form>
+          <div className="registration-status">{registrationStatus}</div>
+        </div>
+        <div className="chat-block">
+          <div id="messages" ref={messagesRef}></div>
+
+          <form onSubmit={handleSubmit} className="form-message">
+            <input
+              id="input"
+              ref={inputRef}
+              placeholder="Enter message..."
+              value={messageInputs[clientId] || ""}
+              onChange={(e) =>
+                setMessageInputs((prevInputs) => ({
+                  ...prevInputs,
+                  [clientId]: e.target.value,
+                }))
+              }
+              onKeyDown={handleKeyDown}
+            />
+            <button className="btn-send" type="submit">
+              Send
+            </button>
+          </form>
+        </div>
       </div>
     </header>
   );

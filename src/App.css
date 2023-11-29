@@ -3,11 +3,12 @@
     .App-header {
       min-height: 100vh;
       display: flex;
-      flex-direction: row;
+      font-family: sans-serif;
       font-size: calc(10px + 2vmin);
-      color: #dcdcdc;
+      flex-direction: column;
       background-color: #11151b;
       gap: 10px;
+      color: #dcdcdc;
     }
 
     .nickName {
@@ -30,9 +31,9 @@
       justify-content: center;
       font-size: 20px;
       color: #dcdcdc;
-      background-color: #000000;
+      background-color: #3498db;
       border: 1px solid #000000;
-      border-radius: 2px;
+      border-radius: 10px;
       cursor: pointer;
       transition: border 0.3s;
       /* Добавляем плавный переход для рамки */
@@ -50,11 +51,11 @@
       width: 100%;
       outline: none;
       padding: 5px;
-      border: 1px solid #000000;
-      border-radius: 4px;
+      border: 1px solid #3498db; /* Обводка инпута в цвет фона */
+      border-radius: 10px;
       height: 30px;
-      background-color: #000000;
-      color: #dcdcdc;
+      background-color: #3498db;
+      color: #ffffff;
       cursor: pointer;
       transition: border 0.3s;
     }
@@ -63,6 +64,10 @@
       border: 1px solid #69696a;
     }
 
+    #inputNick:focus {
+      outline: none; /* Убираем стандартный контур в фокусе */
+      box-shadow: 0 0 10px rgba(52, 152, 219, 0.8); /* Тень при фокусе (цвет синий) */
+    }
     .form-message {
       display: flex;
       width: 100%;
@@ -73,10 +78,11 @@
     }
 
     .btn-send {
+      width: 100px;
       color: #dcdcdc;
-      background-color: #000000;
-      border: 1px solid #dcdcdc;
-      border-radius: 2px;
+      background-color: #3498db;
+      border: 1px solid #3498db; /* Обводка инпута в цвет фона */
+      border-radius: 10px;
       cursor: pointer;
       font-size: 20px;
       transition: border 0.3s;
@@ -85,42 +91,48 @@
     }
 
     .btn-send:hover {
-      border: 1px solid #69696a;
+      border: 1px solid #a6a6a6;
       /* Изменяем рамку при наведении курсора */
     }
-
+    .chat-block {
+      width: 100%;
+    }
     #input {
       width: 100%;
       padding: 10px;
       margin-right: 10px;
-      border: 1px solid #dcdcdc;
-      border-radius: 4px;
+      border-radius: 10px;
       box-sizing: border-box;
+      font-size: 35px;
       height: 50px;
-      background-color: #000000;
       color: #dcdcdc;
       cursor: pointer;
       transition: border 0.3s;
       outline: none;
+      background-color: #3498db; /* Синий цвет для фона инпута */
+      color: #ffffff; /* Белый цвет для текста инпута */
+      border: 1px solid #3498db; /* Обводка инпута в цвет фона */
     }
-
+    #input:focus {
+      outline: none; /* Убираем стандартный контур в фокусе */
+      box-shadow: 0 0 10px rgba(52, 152, 219, 0.8); /* Тень при фокусе (цвет синий) */
+    }
+    #input::placeholder {
+      color: #ffffff;
+      opacity: 0.2;
+    }
     #input:hover {
-      border: 1px solid #69696a;
+      border: 1px solid #a6a6a6;
       ;
       /* Изменяем рамку при наведении курсора */
     }
 
-    #input:focus {
-      border: 1px solid #69696a;
-      ;
-    }
 
     .status {
-      width: 100px;
+      width: 98%;
       display: flex;
-      font-size: small;
-      color: green;
-      align-self: flex-start;
+      align-self: center;
+      color: #2ecc71;
       margin-top: 10px;
     }
 
@@ -136,9 +148,10 @@
     .nick {
       display: flex;
       font-size: 20px;
-      padding-right: 5px;
+      padding-right: 10px;
       color: #dcdcdc;
-      align-self: flex-end;
+      font-weight: bold;
+
     }
 
     .chat-window {
@@ -153,21 +166,23 @@
       width: 80%;
       border-radius: 20px;
       padding: 10px;
-      border: 1px solid #69696a;
-      box-shadow: 0 0 10px rgba(216, 205, 255, 0.4);
+
+    }
+    .time-now {
+      margin-left: auto;
     }
 
     @keyframes flash {
       0% {
-        box-shadow: 0 0 10px rgba(216, 205, 255, 0.4);
+        box-shadow: 0 0 10px rgba(216, 205, 255, 0.1);
       }
 
       50% {
-        box-shadow: 0 0 20px rgba(216, 205, 255, 0.9);
+        box-shadow: 0 0 20px rgba(52, 152, 219, 0.9);
       }
 
       100% {
-        box-shadow: 0 0 10px rgba(216, 205, 255, 0.4);
+        box-shadow: 0 0 10px rgba(216, 205, 255, 0.1);
       }
     }
 
@@ -207,16 +222,14 @@
       height: 100%;
       flex-direction: column;
       align-self: flex-end;
-
     }
 
     .block-message-other {
       display: flex;
       margin: 5px;
-      flex-direction: column;
       font-size: 25px;
-      padding: 15px;
-      border: 1px solid #69696a;
+      padding: 10px;
+      background-color: #7b5a74;
       border-radius: 10px;
       justify-content: flex-start;
       align-self: flex-start;
@@ -225,35 +238,33 @@
     .block-message-server {
       display: flex;
       margin: 5px;
-      flex-direction: column;
       max-width: 80%;
       font-size: 25px;
-      padding: 15px;
-      border: 1px solid #69696a;
+      background-color: #1e9f55;;
+      padding: 10px;
       border-radius: 10px;
-      color: green;
+      color: #11151b
     }
 
     .message-time {
       display: flex;
       align-items: flex-end;
       font-size: 12px;
-      margin-left: 5px;
       align-self: end;
-      opacity: 90%;
     }
 
     .block-message {
       display: flex;
       margin: 5px;
-      max-width: 90%;
       align-self: flex-end;
       padding: 10px;
-      flex-direction: column;
       font-size: 25px;
       padding: 15px;
-      border: 1px solid #69696a;
+      background-color: #3498db;
       border-radius: 10px;
+      max-width: 700px;
+      word-wrap: break-word;
+      overflow: auto;
     }
 
     .block-message-private {
@@ -261,7 +272,6 @@
       margin: 5px;
       max-width: 90%;
       padding: 10px;
-      flex-direction: column;
       font-size: 25px;
       padding: 15px;
       border: 1px solid #69696a;
@@ -272,7 +282,6 @@
    
     @media screen and (max-width: 1024px) {
       .App-header {
-        flex-direction: column;
         min-height: 100vh;
         padding: 10px; /* Пространство вокруг элементов для лучшей читаемости */
       }
@@ -285,31 +294,38 @@
  }
     
       .btn-nick {
-        width: 100%;
+        width: 90%;
         height: 100px;
-        margin-top: 10px;
-        font-size: 60px;
-        
+        margin-top: 30px;
+        font-size: 40px;
+        border-radius: 10px;
+        align-items: center;
+        align-self: center;
+        font-weight: bold;
       }
     
       #inputNick {
         width: 100%;
         height: 70px;
-        font-size: 70px;
-
+        font-size: 50px;
+        border-radius: 10px;
+        padding-left: 10px;
+      }
+      #input {
+        border-radius: 10px;
       }
       .title-input {
-        font-size: 60px;
+        font-size: 30px;
       }
       .registration-status {
-        font-size: 60px;
+        color: #2ecc71;
+        font-size: 20px;
       }
       .status {
-        font-size: 40px;
+        font-size: 30px;
       }
     #inputNick::placeholder {
-      font-size: 70px;
-      opacity: 0.5;
+      display: none;
     }
       .form-message {
         flex-direction: column; /* Изменяем направление для сообщений */
@@ -320,22 +336,27 @@
         width: 100%;
         height: 100px;
         margin-top: 10px;
-        font-size: 60px
+        font-size: 40px;
+        border-radius: 10px;
+        font-weight: bold;
+        color: rgb(219, 253, 253);
       }
     
       #input {
         width: 100%;
         margin: 10px 0;
         height: 100px;
-        font-size: 80px;
+        font-size: 70px;
       }
     
       .chat-window {
-        width: 98%;
+        width: 97%;
         margin: 10px 0;
-        justify-content: flex-start;
+        justify-content: space-between;
       }
-    
+    .chat-block {
+      overflow-y: scroll;
+    }
       #messages {
         
       }
@@ -350,17 +371,19 @@
       .block-message-server,
       .block-message,
       .block-message-private {
-        
       }
       .nick {
         font-size: 40px;
+
       }
       .message {
         margin: 0;
-        font-size: 45px;
+        font-size: 40px;
+
       }
       .form-message {
-        width: 95%;
         align-self: center;
+        margin-bottom: 25px;
       }
+
     }
