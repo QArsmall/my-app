@@ -1,5 +1,5 @@
-const aws = require("aws-sdk");
-const fs = require("fs");
+const { S3Client, PutObjectCommand } = require("@aws-sdk/client-s3");
+const fs = require("fs/promises");
 const dotenv = require("dotenv");
 
 dotenv.config();
@@ -10,27 +10,26 @@ if (!AWS_ACCESS_KEY_ID || !AWS_SECRET_ACCESS_KEY || !AWS_BUCKET_NAME) {
   console.error('Missing required AWS environment variables.');
   process.exit(1);
 }
-console.log('env', process.env.AWS_ACCESS_KEY_ID)
-console.log('env', process.env.AWS_BUCKET_NAME)
-console.log('env', process.env.AWS_SECRET_ACCESS_KEY)
 
-aws.config.update({
-  accessKeyId: process.env.AWS_ACCESS_KEY_ID,
-  secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
-  region: 'eu-central-1'
+const s3Client = new S3Client({
+  region: 'eu-central-1',
+  credentials: {
+    accessKeyId: AWS_ACCESS_KEY_ID,
+    secretAccessKey: AWS_SECRET_ACCESS_KEY,
+  }
+ // Передаем учетные данные из файла конфигурации AWS CLI
 });
-console.log('aws config', aws.config)
-const s3 = new aws.S3({apiVersion: '2006-03-01'});
-const bucketName = process.env.AWS_BUCKET_NAME;
+console.log('AWS SDK Configuration:', s3Client.config);
 
+console.log('cred', s3Client.config.credentials())
 const handleUpload = async (req, res) => {
   try {
     // Прочитайте файл изображения
-    const fileContent = fs.readFileSync(req.file.path);
+    const fileContent = await fs.readFile(req.file.path);
 
     // Определите параметры загрузки
     const params = {
-      Bucket: bucketName,
+      Bucket: AWS_BUCKET_NAME,
       Key: 'uploaded-image.jpg', // Имя файла в бакете
       Body: fileContent,
       ContentType: 'image/jpeg', // Укажите правильный тип контента
@@ -38,10 +37,11 @@ const handleUpload = async (req, res) => {
     };
 
     // Выполните загрузку в S3
-    const result = await s3.upload(params).promise();
+    const command = new PutObjectCommand(params);
+    const result = await s3Client.send(command);
 
     // Удалите временный файл после загрузки
-    fs.unlinkSync(req.file.path);
+    await fs.unlink(req.file.path);
 
     // Верните URL загруженного изображения в ответе
     res.status(200).json({ success: true, imageUrl: result.Location });
