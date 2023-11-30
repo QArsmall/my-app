@@ -31,10 +31,10 @@
       justify-content: center;
       font-size: 20px;
       color: #dcdcdc;
-      background-color: #3498db;
-      border: 1px solid #000000;
+      border: 1px solid #3498db;
       border-radius: 10px;
       cursor: pointer;
+      background-color: #11151b;
       transition: border 0.3s;
       /* Добавляем плавный переход для рамки */
 
@@ -54,7 +54,7 @@
       border: 1px solid #3498db; /* Обводка инпута в цвет фона */
       border-radius: 10px;
       height: 30px;
-      background-color: #3498db;
+      background-color: #11151b;
       color: #ffffff;
       cursor: pointer;
       transition: border 0.3s;
@@ -80,7 +80,7 @@
     .btn-send {
       width: 100px;
       color: #dcdcdc;
-      background-color: #3498db;
+      background-color: #11151b;
       border: 1px solid #3498db; /* Обводка инпута в цвет фона */
       border-radius: 10px;
       cursor: pointer;
@@ -109,7 +109,7 @@
       cursor: pointer;
       transition: border 0.3s;
       outline: none;
-      background-color: #3498db; /* Синий цвет для фона инпута */
+      background-color: #11151b; /* Синий цвет для фона инпута */
       color: #ffffff; /* Белый цвет для текста инпута */
       border: 1px solid #3498db; /* Обводка инпута в цвет фона */
     }
@@ -278,7 +278,16 @@
       color: rgb(164, 18, 162)
         /* Другие стили по вашему усмотрению */
     }
-   
+    .uploaded-image-container {
+      margin-top: 10px; /* или другой подходящий отступ */
+    }
+    
+    .uploaded-image {
+      width: 300px;
+      height: 200px;
+      border-radius: 10px;
+      border: 1px solid #69696a;
+    }
     @media screen and (max-width: 1024px) {
       .App-header {
         min-height: 100vh;
@@ -297,6 +306,7 @@
         height: 100px;
         margin-top: 30px;
         font-size: 40px;
+        background-color: #11151b;
         border-radius: 10px;
         align-items: center;
         align-self: center;

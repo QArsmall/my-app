@@ -33,34 +33,40 @@ function App() {
 
   const handleImageUpload = async (event) => {
     event.preventDefault();
-    const formData = new FormData();
-    formData.append("image", event.target.files[0]);
-
-    try {
-      const response = await axios.post(
-        "http://13.53.182.168:5023/upload",
-        formData,
-        {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
-        }
-      );
-
-      if (response.data.success) {
-        console.log(
-          "Image uploaded successfully. Image URL:",
-          response.data.imageUrl
+  
+    // Проверяем, есть ли файлы
+    if (event.target.files && event.target.files.length > 0) {
+      const formData = new FormData();
+      formData.append("image", event.target.files[0]);
+  
+      try {
+        const response = await axios.post(
+          "http://13.53.182.168:5023/upload",
+          formData,
+          {
+            headers: {
+              "Content-Type": "multipart/form-data",
+            },
+          }
         );
-        setUploadedImageUrl(response.data.imageUrl);
-      } else {
-        console.error("Image upload failed:", response.data.error);
+  
+        if (response.data.success) {
+          console.log(
+            "Image uploaded successfully. Image URL:",
+            response.data
+          );
+          setUploadedImageUrl(response.data.imageUrl);
+        } else {
+          console.error("Image upload failed:", response.data.error);
+        }
+      } catch (error) {
+        console.error("Error uploading image:", error.message);
       }
-    } catch (error) {
-      console.error("Error uploading image:", error.message);
+    } else {
+      console.error("No files selected.");
     }
   };
-
+  
   const handleSaveNickname = async () => {
     const nickname = inpuNickRef.current.value.trim();
     const password = inputPasswordRef.current.value.trim();
@@ -358,6 +364,15 @@ function App() {
               Upload Image
             </button>
           </form>
+          {uploadedImageUrl && (
+            <div className="uploaded-image-container">
+              <img
+                className="uploaded-image"
+                src={uploadedImageUrl}
+                alt="Uploaded"
+              />
+            </div>
+          )}
         </div>
       </div>
     </header>

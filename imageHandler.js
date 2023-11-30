@@ -19,36 +19,47 @@ const s3Client = new S3Client({
   }
  // Передаем учетные данные из файла конфигурации AWS CLI
 });
-console.log('AWS SDK Configuration:', s3Client.config);
 
-console.log('cred', s3Client.config.credentials())
+const { v4: uuidv4 } = require('uuid');
+
 const handleUpload = async (req, res) => {
   try {
     // Прочитайте файл изображения
     const fileContent = await fs.readFile(req.file.path);
 
+    // Генерируйте уникальный ключ с использованием uuid
+    const uniqueKey = `${uuidv4()}.jpg`;
+
     // Определите параметры загрузки
     const params = {
       Bucket: AWS_BUCKET_NAME,
-      Key: 'uploaded-image.jpg', // Имя файла в бакете
+      Key: uniqueKey,
       Body: fileContent,
-      ContentType: 'image/jpeg', // Укажите правильный тип контента
-      ACL: 'public-read', // Установите разрешения на чтение для всех
+      ContentType: 'image/jpeg',
+      ACL: 'public-read',
     };
 
     // Выполните загрузку в S3
     const command = new PutObjectCommand(params);
-    const result = await s3Client.send(command);
+    await s3Client.send(command);
+
+    // Соберите URL вручную
+    const region = 'eu-central-1'; // Укажите свой регион
+    const bucket = AWS_BUCKET_NAME;
+    const key = uniqueKey;
+
+    const imageUrl = `https://${bucket}.s3.${region}.amazonaws.com/${key}`;
 
     // Удалите временный файл после загрузки
     await fs.unlink(req.file.path);
 
     // Верните URL загруженного изображения в ответе
-    res.status(200).json({ success: true, imageUrl: result.Location });
+    res.status(200).json({ success: true, imageUrl });
   } catch (error) {
     console.error('Error handling image upload:', error);
     res.status(500).json({ success: false, error: 'Internal Server Error' });
   }
 };
+
 
 module.exports = { handleUpload };
