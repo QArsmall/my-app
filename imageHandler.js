@@ -1,26 +1,37 @@
-require('dotenv').config(); // Загрузка переменных окружения из файла .env
+const aws = require("aws-sdk");
+const fs = require("fs");
+const dotenv = require("dotenv");
 
-const aws = require('aws-sdk');
-const fs = require('fs');
+dotenv.config();
 
-// Конфигурируем S3
+const { AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_BUCKET_NAME } = process.env;
+
+if (!AWS_ACCESS_KEY_ID || !AWS_SECRET_ACCESS_KEY || !AWS_BUCKET_NAME) {
+  console.error('Missing required AWS environment variables.');
+  process.exit(1);
+}
+console.log('env', process.env.AWS_ACCESS_KEY_ID)
+console.log('env', process.env.AWS_BUCKET_NAME)
+console.log('env', process.env.AWS_SECRET_ACCESS_KEY)
+
 aws.config.update({
   accessKeyId: process.env.AWS_ACCESS_KEY_ID,
   secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+  region: 'eu-central-1'
 });
-
-const s3 = new aws.S3();
-const bucketName = AWS_BUCKET_NAME;
+console.log('aws config', aws.config)
+const s3 = new aws.S3({apiVersion: '2006-03-01'});
+const bucketName = process.env.AWS_BUCKET_NAME;
 
 const handleUpload = async (req, res) => {
   try {
     // Прочитайте файл изображения
-    const fileContent = fs.readFileSync('./public/111.jpg');
+    const fileContent = fs.readFileSync(req.file.path);
 
     // Определите параметры загрузки
     const params = {
       Bucket: bucketName,
-      Key: '111.jpg', // Имя файла в бакете
+      Key: 'uploaded-image.jpg', // Имя файла в бакете
       Body: fileContent,
       ContentType: 'image/jpeg', // Укажите правильный тип контента
       ACL: 'public-read', // Установите разрешения на чтение для всех
@@ -28,6 +39,9 @@ const handleUpload = async (req, res) => {
 
     // Выполните загрузку в S3
     const result = await s3.upload(params).promise();
+
+    // Удалите временный файл после загрузки
+    fs.unlinkSync(req.file.path);
 
     // Верните URL загруженного изображения в ответе
     res.status(200).json({ success: true, imageUrl: result.Location });

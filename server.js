@@ -1,8 +1,12 @@
+require('dotenv').config(); // Загрузка переменных окружения из файла .env
+const multer = require('multer');
+
 const express = require("express");
 const http = require("http");
 const WebSocket = require("ws");
 const fs = require("fs");
 const bcrypt = require("bcrypt");
+const upload = multer({ dest: "uploads/" });
 
 const { handleUpload } = require('./imageHandler');
 
@@ -12,7 +16,16 @@ const wss = new WebSocket.Server({ server });
 let counter = 0;
 const activeUsers = [];
 // Загрузка изображения
-app.post('/upload', handleUpload);
+app.use((req, res, next) => {
+  res.header("Access-Control-Allow-Origin", "http://13.53.182.168:3000");
+  res.header(
+    "Access-Control-Allow-Headers",
+    "Origin, X-Requested-With, Content-Type, Accept"
+  );
+  next();
+});
+
+app.post("/upload", upload.single("image"), handleUpload);
 
 function generateClientId() {
   return Math.random().toString(36).substr(2, 9);
@@ -124,14 +137,7 @@ wss.on("connection", (ws, req) => {
   );
 });
 
-app.use((req, res, next) => {
-  res.header("Access-Control-Allow-Origin", "http://13.53.182.168:3000");
-  res.header(
-    "Access-Control-Allow-Headers",
-    "Origin, X-Requested-With, Content-Type, Accept"
-  );
-  next();
-});
+
 
 app.post("/saveNickname", express.json(), async (req, res) => {
   try {
@@ -200,4 +206,30 @@ app.post("/saveNickname", express.json(), async (req, res) => {
 const PORT = 5023;
 server.listen(PORT, () => {
   console.log("Server is listening on port:", PORT);
+});
+process.on("unhandledRejection", (reason, promise) => {
+  console.error("Unhandled Rejection at:", promise, "reason:", reason);
+});
+
+process.on("uncaughtException", (error) => {
+  console.error("Uncaught Exception:", error.message);
+  process.exit(1);
+});
+
+process.on("SIGTERM", () => {
+  console.log("Received SIGTERM. Shutting down gracefully.");
+  // Дополнительная логика закрытия ресурсов, если необходимо
+  server.close(() => {
+    console.log("Server closed. Exiting process.");
+    process.exit(0);
+  });
+});
+
+process.on("SIGINT", () => {
+  console.log("Received SIGINT. Shutting down gracefully.");
+  // Дополнительная логика закрытия ресурсов, если необходимо
+  server.close(() => {
+    console.log("Server closed. Exiting process.");
+    process.exit(0);
+  });
 });

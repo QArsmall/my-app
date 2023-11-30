@@ -29,6 +29,37 @@ function App() {
   const [isChatFlashing, setIsChatFlashing] = useState(false);
   const [nickname, setNickname] = useState(""); // Новое состояние для никнейма
   const [currentTime, setCurrentTime] = useState("");
+  const [uploadedImageUrl, setUploadedImageUrl] = useState("");
+
+  const handleImageUpload = async (event) => {
+    event.preventDefault();
+    const formData = new FormData();
+    formData.append("image", event.target.files[0]);
+
+    try {
+      const response = await axios.post(
+        "http://13.53.182.168:5023/upload",
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
+
+      if (response.data.success) {
+        console.log(
+          "Image uploaded successfully. Image URL:",
+          response.data.imageUrl
+        );
+        setUploadedImageUrl(response.data.imageUrl);
+      } else {
+        console.error("Image upload failed:", response.data.error);
+      }
+    } catch (error) {
+      console.error("Error uploading image:", error.message);
+    }
+  };
 
   const handleSaveNickname = async () => {
     const nickname = inpuNickRef.current.value.trim();
@@ -98,9 +129,9 @@ function App() {
       const timeDiv = document.createElement("div");
       timeDiv.className = "message-time";
       const currentTime = new Date();
-      const hours = currentTime.getHours().toString().padStart(2, '0');
-      const minutes = currentTime.getMinutes().toString().padStart(2, '0');
-      const seconds = currentTime.getSeconds().toString().padStart(2, '0');
+      const hours = currentTime.getHours().toString().padStart(2, "0");
+      const minutes = currentTime.getMinutes().toString().padStart(2, "0");
+      const seconds = currentTime.getSeconds().toString().padStart(2, "0");
       timeDiv.textContent = `${hours}:${minutes}:${seconds}`;
 
       messageDiv.textContent = value;
@@ -313,6 +344,18 @@ function App() {
             />
             <button className="btn-send" type="submit">
               Send
+            </button>
+          </form>
+          {/* Форма для загрузки изображений */}
+          <form encType="multipart/form-data" className="form-image-upload">
+            <input
+              type="file"
+              name="image"
+              accept="image/*"
+              onChange={handleImageUpload}
+            />
+            <button type="button" onClick={handleImageUpload}>
+              Upload Image
             </button>
           </form>
         </div>
